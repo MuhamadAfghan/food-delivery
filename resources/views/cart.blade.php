@@ -118,7 +118,7 @@
                 try {
                     var raw = localStorage.getItem(CART_KEY);
                     var parsed = raw ? JSON.parse(raw) : {};
-                    return parsed && typeof parsed === 'object' ? parsed : {};
+                    return parsed;
                 } catch (e) {
                     return {};
                 }
@@ -128,12 +128,43 @@
                 localStorage.setItem(CART_KEY, JSON.stringify(cart));
             }
 
+            function parseQty(entry) {
+                if (entry == null) return 0;
+                if (typeof entry === 'number') return entry;
+                if (typeof entry === 'string') return parseInt(entry, 10);
+                if (typeof entry === 'object') {
+                    var q = entry.quantity ?? entry.qty ?? entry.count ?? 0;
+                    return parseInt(q, 10);
+                }
+                return 0;
+            }
+
             function normalizeCart(cart) {
                 var normalized = {};
-                Object.keys(cart || {}).forEach(function(productId) {
-                    var qty = parseInt(cart[productId], 10);
+
+                if (Array.isArray(cart)) {
+                    cart.forEach(function(row) {
+                        if (!row || typeof row !== 'object') return;
+                        var productId = row.product_id ?? row.productId ?? row.id;
+                        if (productId == null) return;
+                        var qty = parseQty(row.quantity ?? row.qty ?? row.count);
+                        if (!isNaN(qty) && qty > 0) normalized[String(productId)] = qty;
+                    });
+                    return normalized;
+                }
+
+                if (cart && typeof cart === 'object' && cart.items && (Array.isArray(cart.items) || typeof cart
+                        .items === 'object')) {
+                    return normalizeCart(cart.items);
+                }
+
+                if (!cart || typeof cart !== 'object') return normalized;
+
+                Object.keys(cart).forEach(function(productId) {
+                    var qty = parseQty(cart[productId]);
                     if (!isNaN(qty) && qty > 0) normalized[String(productId)] = qty;
                 });
+
                 return normalized;
             }
 
@@ -146,12 +177,8 @@
             }
 
             function countItems(cart) {
-                var total = 0;
-                Object.keys(cart || {}).forEach(function(productId) {
-                    var qty = parseInt(cart[productId], 10);
-                    if (!isNaN(qty) && qty > 0) total += qty;
-                });
-                return total;
+                var normalized = normalizeCart(cart);
+                return Object.keys(normalized).length;
             }
 
             function refreshBadge() {

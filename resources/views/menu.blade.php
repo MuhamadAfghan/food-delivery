@@ -63,7 +63,7 @@
                                     {{ $product->description }}
                                 </p>
                             @endif
-                            <button type="button" data-add-to-cart data-product-id="{{ $product->id }}"
+                            <button type="button"
                                 class="mt-6 w-full rounded-full bg-orange-600 px-5 py-3 text-sm font-semibold text-white hover:bg-orange-700">
                                 Add to cart
                             </button>
@@ -83,118 +83,6 @@
         </footer>
     </div>
 
-    <div id="toast"
-        class="pointer-events-none fixed bottom-6 left-1/2 z-[60] hidden -translate-x-1/2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-lg"
-        role="status" aria-live="polite"></div>
-
-    <script>
-        (function() {
-            var CART_KEY = 'risebowl_cart';
-            var toastTimer = null;
-
-            function showToast(message) {
-                var el = document.getElementById('toast');
-                if (!el) return;
-                el.textContent = message;
-                el.classList.remove('hidden');
-                if (toastTimer) window.clearTimeout(toastTimer);
-                toastTimer = window.setTimeout(function() {
-                    el.classList.add('hidden');
-                }, 2000);
-            }
-
-            function readCart() {
-                try {
-                    var raw = localStorage.getItem(CART_KEY);
-                    var parsed = raw ? JSON.parse(raw) : {};
-                    return parsed;
-                } catch (e) {
-                    return {};
-                }
-            }
-
-            function writeCart(cart) {
-                localStorage.setItem(CART_KEY, JSON.stringify(cart));
-            }
-
-            function parseQty(entry) {
-                if (entry == null) return 0;
-                if (typeof entry === 'number') return entry;
-                if (typeof entry === 'string') return parseInt(entry, 10);
-                if (typeof entry === 'object') {
-                    var q = entry.quantity ?? entry.qty ?? entry.count ?? 0;
-                    return parseInt(q, 10);
-                }
-                return 0;
-            }
-
-            function normalizeCart(cart) {
-                var normalized = {};
-
-                if (Array.isArray(cart)) {
-                    cart.forEach(function(row) {
-                        if (!row || typeof row !== 'object') return;
-                        var productId = row.product_id ?? row.productId ?? row.id;
-                        if (productId == null) return;
-                        var qty = parseQty(row.quantity ?? row.qty ?? row.count);
-                        if (!isNaN(qty) && qty > 0) normalized[String(productId)] = qty;
-                    });
-                    return normalized;
-                }
-
-                if (cart && typeof cart === 'object' && cart.items && (Array.isArray(cart.items) || typeof cart
-                        .items === 'object')) {
-                    return normalizeCart(cart.items);
-                }
-
-                if (!cart || typeof cart !== 'object') return normalized;
-
-                Object.keys(cart).forEach(function(productId) {
-                    var qty = parseQty(cart[productId]);
-                    if (!isNaN(qty) && qty > 0) normalized[String(productId)] = qty;
-                });
-
-                return normalized;
-            }
-
-            function countItems(cart) {
-                var normalized = normalizeCart(cart);
-                return Object.keys(normalized).length;
-            }
-
-            function refreshBadge() {
-                var badge = document.getElementById('cartCount');
-                if (!badge) return;
-                badge.textContent = String(countItems(readCart()));
-            }
-
-            function addToCart(productId) {
-                var cart = normalizeCart(readCart());
-                var key = String(productId);
-                var current = parseInt(cart[key] || 0, 10);
-                if (isNaN(current) || current < 0) current = 0;
-                cart[key] = current + 1;
-                writeCart(cart);
-                refreshBadge();
-
-                showToast('Berhasil ditambahkan ke cart');
-            }
-
-            document.addEventListener('click', function(e) {
-                var btn = e.target && e.target.closest ? e.target.closest('[data-add-to-cart]') : null;
-                if (!btn) return;
-                var productId = btn.getAttribute('data-product-id');
-                if (!productId) return;
-                addToCart(productId);
-            });
-
-            window.addEventListener('storage', function(ev) {
-                if (ev && ev.key === CART_KEY) refreshBadge();
-            });
-
-            refreshBadge();
-        })();
-    </script>
 </body>
 
 </html>

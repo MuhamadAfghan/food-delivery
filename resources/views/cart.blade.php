@@ -249,10 +249,10 @@
                     total += line;
 
                     html += (
-                        '<div class="flex gap-4 rounded-3xl bg-white/70 p-6 ring-1 ring-slate-200 backdrop-blur">' +
-                        '  <div class="h-24 w-24 overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-200">' +
+                        '<div class="flex gap-4 p-6 rounded-3xl bg-white/70 ring-1 ring-slate-200 backdrop-blur">' +
+                        '  <div class="w-24 h-24 overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-200">' +
                         (p.image_url ? ('    <img src="' + p.image_url + '" alt="' + (p.name || '') +
-                            '" class="h-full w-full object-cover" />') : '') +
+                            '" class="object-cover w-full h-full" />') : '') +
                         '  </div>' +
                         '  <div class="flex-1">' +
                         '    <div class="flex items-start justify-between gap-4">' +
@@ -265,11 +265,11 @@
                         '      <button type="button" data-remove-item data-product-id="' + productId +
                         '" class="text-sm font-semibold text-red-700 hover:underline">Remove</button>' +
                         '    </div>' +
-                        '    <div class="mt-4 flex flex-wrap items-center gap-4">' +
+                        '    <div class="flex flex-wrap items-center gap-4 mt-4">' +
                         '      <label class="text-sm text-slate-600">Qty</label>' +
                         '      <input type="number" min="1" data-qty-input data-product-id="' + productId +
                         '" value="' + qty +
-                        '" class="w-24 rounded-2xl bg-white px-4 py-2 text-sm text-slate-900 ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-600" />' +
+                        '" class="w-24 px-4 py-2 text-sm bg-white rounded-2xl text-slate-900 ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-600" />' +
                         '      <div class="text-sm font-semibold text-slate-900">Line: ' + formatRupiah(
                             line) + '</div>' +
                         '    </div>' +

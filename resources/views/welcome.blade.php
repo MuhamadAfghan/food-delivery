@@ -17,10 +17,6 @@
     @endif
 </head>
 
-@php
-    $cartCount = collect(session('cart', []))->sum();
-@endphp
-
 <body class="bg-white font-sans text-slate-900 antialiased">
     <div class="relative overflow-hidden">
         <div aria-hidden="true" class="pointer-events-none absolute inset-0">
@@ -54,8 +50,8 @@
                             class="relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50"
                             aria-label="Cart">
                             Cart
-                            <span
-                                class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-600 px-1 text-xs font-semibold text-white">{{ $cartCount }}</span>
+                            <span id="cartCount"
+                                class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-600 px-1 text-xs font-semibold text-white">0</span>
                         </a>
                     </div>
                 </div>
@@ -123,13 +119,10 @@
                                         {{ $product->description }}
                                     </p>
                                 @endif
-                                <form method="POST" action="{{ url('/cart/add/' . $product->id) }}">
-                                    @csrf
-                                    <button
-                                        class="mt-6 w-full rounded-full bg-orange-600 px-5 py-3 text-sm font-semibold text-white hover:bg-orange-700">
-                                        Add to cart Rp {{ number_format($product->price, 0, ',', '.') }}
-                                    </button>
-                                </form>
+                                <button type="button" data-add-to-cart data-product-id="{{ $product->id }}"
+                                    class="mt-6 w-full rounded-full bg-orange-600 px-5 py-3 text-sm font-semibold text-white hover:bg-orange-700">
+                                    Add to cart Rp {{ number_format($product->price, 0, ',', '.') }}
+                                </button>
                             </article>
                         @endforeach
                     @else
@@ -210,6 +203,83 @@
             © {{ date('Y') }} Rise Bowl. All rights reserved.
         </footer>
     </div>
+
+    <div id="toast"
+        class="pointer-events-none fixed bottom-6 left-1/2 z-[60] hidden -translate-x-1/2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-lg"
+        role="status" aria-live="polite"></div>
+
+    <script>
+        (function() {
+            var CART_KEY = 'risebowl_cart';
+            var toastTimer = null;
+
+            function showToast(message) {
+                var el = document.getElementById('toast');
+                if (!el) return;
+                el.textContent = message;
+                el.classList.remove('hidden');
+                if (toastTimer) window.clearTimeout(toastTimer);
+                toastTimer = window.setTimeout(function() {
+                    el.classList.add('hidden');
+                }, 2000);
+            }
+
+            function readCart() {
+                try {
+                    var raw = localStorage.getItem(CART_KEY);
+                    var parsed = raw ? JSON.parse(raw) : {};
+                    return parsed && typeof parsed === 'object' ? parsed : {};
+                } catch (e) {
+                    return {};
+                }
+            }
+
+            function writeCart(cart) {
+                localStorage.setItem(CART_KEY, JSON.stringify(cart));
+            }
+
+            function countItems(cart) {
+                var total = 0;
+                Object.keys(cart || {}).forEach(function(productId) {
+                    var qty = parseInt(cart[productId], 10);
+                    if (!isNaN(qty) && qty > 0) total += qty;
+                });
+                return total;
+            }
+
+            function refreshBadge() {
+                var badge = document.getElementById('cartCount');
+                if (!badge) return;
+                badge.textContent = String(countItems(readCart()));
+            }
+
+            function addToCart(productId) {
+                var cart = readCart();
+                var key = String(productId);
+                var current = parseInt(cart[key] || 0, 10);
+                if (isNaN(current) || current < 0) current = 0;
+                cart[key] = current + 1;
+                writeCart(cart);
+                refreshBadge();
+
+                showToast('Berhasil ditambahkan ke cart');
+            }
+
+            document.addEventListener('click', function(e) {
+                var btn = e.target && e.target.closest ? e.target.closest('[data-add-to-cart]') : null;
+                if (!btn) return;
+                var productId = btn.getAttribute('data-product-id');
+                if (!productId) return;
+                addToCart(productId);
+            });
+
+            window.addEventListener('storage', function(ev) {
+                if (ev && ev.key === CART_KEY) refreshBadge();
+            });
+
+            refreshBadge();
+        })();
+    </script>
 </body>
 
 </html>

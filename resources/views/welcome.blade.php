@@ -24,39 +24,7 @@
             <div class="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-orange-100 blur-3xl"></div>
         </div>
 
-        <header class="fixed inset-x-0 top-0 z-50 border-b border-slate-200/70 bg-white/70 backdrop-blur">
-            <div class="mx-auto max-w-6xl px-6">
-                <div class="flex items-center justify-between py-6">
-                    <a href="#home" class="flex items-center gap-2 font-semibold tracking-tight">
-                        <span class="text-orange-600">RISE</span>
-                        <span class="text-slate-900">BOWL</span>
-                    </a>
-
-                    <nav class="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
-                        <a href="#home" class="hover:text-slate-900">Home</a>
-                        <a href="{{ url('/menu') }}" class="hover:text-slate-900">Menu</a>
-                        <a href="#about" class="hover:text-slate-900">About</a>
-                        <a href="#contact" class="hover:text-slate-900">Contact</a>
-                        <a href="{{ url('/admin') }}" class="hover:text-slate-900">Admin</a>
-                    </nav>
-
-                    <div class="flex items-center gap-4">
-                        <a href="{{ url('/menu') }}"
-                            class="hidden rounded-full bg-orange-600 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-700 md:inline-flex">
-                            Order Now
-                        </a>
-
-                        <a href="{{ url('/cart') }}"
-                            class="relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50"
-                            aria-label="Cart">
-                            Cart
-                            <span id="cartCount"
-                                class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-600 px-1 text-xs font-semibold text-white">0</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </header>
+        @include('partials.navbar', ['isHome' => true, 'active' => null, 'showOrderNow' => true])
 
         <main class="relative pt-24" id="home">
             <section class="mx-auto max-w-6xl px-6 pb-16 pt-8 md:pt-12">
